@@ -5,3 +5,10 @@ interface User {
   email: string;
   phone: string;
 }
+
+interface Post {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}
