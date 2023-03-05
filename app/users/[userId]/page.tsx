@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { getUser } from '@/lib/users';
 import { getUserPosts } from '@/lib/posts';
@@ -20,7 +21,7 @@ const UserPage = async ({ params }: Params) => {
   const userData = getUser(params.userId);
   const postsData = getUserPosts(params.userId);
 
-  const [user, posts] = await Promise.all([userData, postsData]);
+  const user = await userData;
 
   return (
     <div>
@@ -30,7 +31,10 @@ const UserPage = async ({ params }: Params) => {
       <p>Email: {user.email}</p>
       <p>Phone: {user.phone}</p>
       <hr />
-      <Posts posts={posts} />
+      <Suspense fallback={<div>Loading...</div>}>
+        {/* @ts-expect-error Server Component */}
+        <Posts postsData={postsData} />
+      </Suspense>
     </div>
   );
 };
