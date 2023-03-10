@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
 
 import getUsers, { getUser } from '@/lib/users';
 import { getUserPosts } from '@/lib/posts';
@@ -13,15 +14,25 @@ interface Params {
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const user = await getUser(params.userId);
-  return { title: user.name };
+  const userData: Promise<User> = getUser(params.userId);
+  const user: User = await userData;
+
+  if (!user.name) {
+    return {
+      title: 'User Not Found',
+    };
+  }
+
+  return { title: user.name, description: `This is the page of ${user.name}` };
 }
 
 const UserPage = async ({ params }: Params) => {
-  const userData = getUser(params.userId);
-  const postsData = getUserPosts(params.userId);
+  const userData: Promise<User> = getUser(params.userId);
+  const postsData: Promise<Post[]> = getUserPosts(params.userId);
 
-  const user = await userData;
+  const user: User = await userData;
+
+  if (!user.name) return notFound();
 
   return (
     <div>
@@ -41,8 +52,8 @@ const UserPage = async ({ params }: Params) => {
 
 // SSG => Static site generation
 export async function generateStaticParams() {
-  const usersData = getUsers();
-  const users = await usersData;
+  const usersData: Promise<User[]> = getUsers();
+  const users: User[] = await usersData;
 
   return users.map((user) => ({
     // you should return all your number in string format
