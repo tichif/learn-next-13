@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { getUser } from '@/lib/users';
+import getUsers, { getUser } from '@/lib/users';
 import { getUserPosts } from '@/lib/posts';
 import Posts from './Posts';
 
@@ -38,5 +38,17 @@ const UserPage = async ({ params }: Params) => {
     </div>
   );
 };
+
+// SSG => Static site generation
+export async function generateStaticParams() {
+  const usersData = getUsers();
+  const users = await usersData;
+
+  return users.map((user) => ({
+    // you should return all your number in string format
+    // because URL params is always string
+    userId: user.id.toString(),
+  }));
+}
 
 export default UserPage;
